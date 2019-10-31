@@ -8,6 +8,11 @@
 
 import SpriteKit
 
+public enum MagneticAxis : Int {
+    case horizontal
+    case vertical
+}
+
 @objc public protocol MagneticDelegate: class {
     func magnetic(_ magnetic: Magnetic, didSelect node: Node)
     func magnetic(_ magnetic: Magnetic, didDeselect node: Node)
@@ -31,6 +36,11 @@ import SpriteKit
     
     open var isDragging: Bool = false
     
+    /**
+     Define orientation axis for the bullet placements. Default: horizontal.
+     */
+    open var axis: MagneticAxis = .horizontal
+
     /**
      The selected children.
      */
@@ -76,8 +86,14 @@ import SpriteKit
         physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         physicsBody = SKPhysicsBody(edgeLoopFrom: { () -> CGRect in
             var frame = self.frame
-            frame.size.width = CGFloat(radius)
-            frame.origin.x -= frame.size.width / 2
+            switch axis {
+            case .horizontal:
+                frame.size.width = CGFloat(radius)
+                frame.origin.x -= frame.size.width / 2
+            case .vertical:
+                frame.size.height = CGFloat(radius)
+                frame.origin.y -= frame.size.width / 2
+            }
             return frame
         }())
         
@@ -88,11 +104,23 @@ import SpriteKit
     }
     
     override open func addChild(_ node: SKNode) {
-        var x = -node.frame.width // left
-        if children.count % 2 == 0 {
-            x = frame.width + node.frame.width // right
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        switch axis {
+        case .horizontal:
+            x = -node.frame.width // left
+            if children.count % 2 == 0 {
+                x = frame.width + node.frame.width // right
+            }
+            y = CGFloat.random(node.frame.height, frame.height - node.frame.height)
+        case .vertical:
+            y = -node.frame.height // top
+            if children.count % 2 == 0 {
+                y = frame.height + node.frame.height // bottom
+            }
+            x = CGFloat.random(node.frame.width, frame.width - node.frame.width)
         }
-        let y = CGFloat.random(node.frame.height, frame.height - node.frame.height)
+
         node.position = CGPoint(x: x, y: y)
         super.addChild(node)
     }
