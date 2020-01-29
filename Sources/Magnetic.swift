@@ -92,7 +92,7 @@ public enum MagneticAxis : Int {
                 frame.origin.x -= frame.size.width / 2
             case .vertical:
                 frame.size.height = CGFloat(radius)
-                frame.origin.y -= frame.size.width / 2
+                frame.origin.y -= frame.size.height / 2
             }
             return frame
         }())
